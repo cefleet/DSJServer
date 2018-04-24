@@ -1,2 +1,2 @@
 # dsjreact
-The newest react dragon souljourn
+The newest dragon souljourn server
