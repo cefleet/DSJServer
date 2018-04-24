@@ -1,4 +1,5 @@
 const AppData = require("./AppData");
+const UserHandler = require("./UserHandler");
 
 const TurnHandler = {
   startTurn: function(unitId,battleId){
@@ -235,14 +236,23 @@ const TurnHandler = {
             logItem.actionData.results.push({
               "unit":unit.id,
               "statusChange":"IsTotalDesperation"
-            });
+            }); 
           } else if(commander.unitOrder.length === 0){
-            console.log('Game Over');
             battle.battleOver = true;
-
             gameOver = {
               "action":"GameOver",
               "timestamp":Date.now()
+            }
+
+            for(comId in battle.commanders){
+              if(battle.commanders[comId].unitOrder.length > 0){
+                console.log('winner');
+                if(AppData.Users.hasOwnProperty(comId)){
+                  console.log("winner is a user!");
+                  UserHandler.giveUserMapRewards(comId, battle.map);
+                  console.log("send user request");
+                }
+              }
             }
           }
         }
@@ -256,6 +266,8 @@ const TurnHandler = {
       if(battle.battleOver){
         changes.battleLog.push(gameOver);
         battle.battleLog.push(gameOver);
+
+
       }
 
       return changes;

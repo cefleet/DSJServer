@@ -3,6 +3,7 @@ const AbilityCalculator = require("./AbilityCalculator");
 const BattleStarter = require("./BattleStarter");
 const TurnHandler = require("./TurnHandler");
 const AIHandler = require("./AIHandler");
+const UserHandler = require("./UserHandler");
 
 const AppData = require("./AppData.js");
 
@@ -22,6 +23,8 @@ const BattleAPI = {
     //add battle to AppData. TODO Future this will be a save action to the DB
     AppData.battles[battle.id] = battle;
 
+    UserHandler.giveBattleToUser(AppData.connections[msg.wsId].userId, battle.id);
+
     var gridKeys = AppData.DB.map[battle.map].keyMap;
     for(g in gridKeys){
       var nighs = HexAPI.getNeighbors(HexAPI.hex(g));
@@ -32,6 +35,10 @@ const BattleAPI = {
     }
 
     next({"response":"battleCreated","responseData":{"battle":battle, "gridKeys":gridKeys}});
+  },
+
+  joinBattle(msg,next){
+
   },
 
   getMapPoints(msg, next){
@@ -248,8 +255,7 @@ const BattleAPI = {
           changes.activeUnit = battle.activeUnit;
         }
         changes.battleLog = logItems;
-        console.log(changes);
-      next({"broadcast":"all","response":"nextTurn","responseData":{"battle":battle,"changes":changes}})
+        next({"broadcast":"all","response":"nextTurn","responseData":{"battle":battle,"changes":changes}})
 
       }//afterAI
 

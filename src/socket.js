@@ -30,11 +30,18 @@ class socket {
     //if there is no broadcast it assumes single
     if(returnData.broadcast === "single" || !returnData.broadcast){
       console.log('sending ', returnData.response);
+
+      if(typeof returnData.responseData === "object"){
+        var user = AppData.Users[ws.userId];
+        returnData.responseData.connectedUser = user;
+      }
       ws.send(JSON.stringify({"responseData":returnData.responseData, "response":returnData.response, "returnFunc":returnFunc}));
     } if(returnData.broadcast === "all"){
       var battle = AppData.battles[returnData.responseData.battle.id];
       battle.connections.forEach(function(con){
         console.log('sending via broadcast ',returnData.response);
+        var user = AppData.Users[AppData.connections[con].userId];
+        returnData.responseData.connectedUser = user;
         AppData.connections[con].send(JSON.stringify({"responseData":returnData.responseData, "response":returnData.response, "returnFunc":returnFunc}));
       });
 
@@ -43,7 +50,6 @@ class socket {
 
   connectionCreated(ws){
     //gives the ws an id and saves the connection
-
 
     ws.id = uuidv4();
     AppData.connections[ws.id] = ws;
@@ -54,11 +60,13 @@ class socket {
       //If it is requesting to login allow it to do so.
       if(msg.hasOwnProperty("request") && msg.request === "login"){
         var results = Auth.checkCredentials(msg);
+        console.log(results);
+        ws.userId = results.userId;
         this.respond(ws,msg.returnFunc, results.send);
         return; // go no futher until login is complete
       //if it is not asking to login, check the token.
       }
-
+ 
       if(msg.hasOwnProperty("request") && msg.request === "logout"){
         for(var b in AppData.battles){
           var battle = AppData.battles[b];
@@ -73,7 +81,7 @@ class socket {
         this.respond(ws,msg.returnFunc, {
           "response":"logedOut"
         });
-        return; 
+        return;
       }
 
       var authData = Auth.isTokenValid(msg);
@@ -84,6 +92,7 @@ class socket {
         this.respond(ws,msg.returnFunc,{"response":"tokenIsGood"});
       } else {
         //TODO NEEDS SOME KIND OF SECURITY CHWECK HERE
+        console.log(authData);
         ws.userId = authData.userId;
       }
 
@@ -133,15 +142,6 @@ class socket {
           }
         }
       }
-      /*
-      if(AppData.clients[ws.clientId].battle){
-        //This may need to be changed THe battle has too much data as it is
-        var battle = AppData.battles[AppData.clients[ws.clientId].battle];
-        battle.connections.splice(battle.connections.indexOf(ws.id), 1);
-      }
-      delete AppData.connections[ws.id];
-      */
-      console.log('Closing and need to do something with it.');
     }.bind(this));
   };
 
