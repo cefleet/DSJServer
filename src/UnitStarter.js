@@ -3,7 +3,7 @@ const uuidv4 = require('uuid/v4');
 
 function UnitStarter(data){
   var unit = {
-    id:uuidv4(),
+    id:data.id || uuidv4(),
     name:data.name,
     onHex:data.onHex,
     didAbility:false,

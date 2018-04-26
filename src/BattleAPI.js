@@ -1,6 +1,7 @@
 const HexAPI = require("./HexAPI");
 const AbilityCalculator = require("./AbilityCalculator");
 const BattleStarter = require("./BattleStarter");
+const UnitStarter = require("./UnitStarter");
 const TurnHandler = require("./TurnHandler");
 const AIHandler = require("./AIHandler");
 const UserHandler = require("./UserHandler");
@@ -111,6 +112,34 @@ const BattleAPI = {
     battle.battleStarted = true;
 
     next({"broadcast":"all","response":"battleStarted", "responseData":{"battle":battle,"changes":changes}});
+  },
+
+  makeUnit(msg, next){
+    var battle = AppData.battles[msg.requestData.battleId];
+
+    //prevents from monkeying with unit after battle started
+    if(battle.battleStarted){
+      next({"response":"cannotCreateUnit","responseData":{"err":"Battle Started"}});
+      return;
+    }
+    console.log('I will need to do a lot of checks here but for now its just going to go through');
+
+    //TODO check for avilible spot on the map
+    //TODO check for avalible parts for unit
+
+    var unit = UnitStarter(msg.requestData.unitData);
+    var comm = battle.commanders[AppData.connections[msg.wsId].userId];
+
+    unit.commander = comm.id;
+    //if it already existed then it will just overwrite the old one.
+    battle.units[unit.id] = unit;
+
+    if(comm.unitOrder.indexOf(unit.id) < 0){
+      comm.unitOrder.push(unit.id)
+    }
+
+    //does't matter which one because the battle is going to be updated
+    next({"broadcast":"all","response":"unitCreated", "responseData":{"battle":battle}});
   },
 
   endTurn(msg, next){

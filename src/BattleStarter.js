@@ -22,26 +22,35 @@ function BattleStarter(msg){
     map:map.id,
     isReady:false,
     connections:[]
-  }
+  } 
 
   //setup The User's Commander who started the battle
   var player = CommanderStarter(user);
   battle.commanders[player.id] = player;
+  battle.commanders[player.id].playerIdent = "player1";
 
-  user.units.forEach(function(unitData){
+  //if there are units already.
+  user.units.forEach(function(unitData,idx){
+
     var unit = UnitStarter(unitData);
-    battle.units[unit.id] = unit;
-    player.unitOrder.push(unit.id);
-    unit.commander = player.id;
 
-    battle.battleLog.push({
-      "action":"UnitPlacedOnHex",
-      "timestamp":Date.now(),
-      "actionData":{
-        "unit":unit.id,
-        "hex":unit.onHex
-      }
-    })
+    //if there is enough players
+    if(map.player1StartLocations.length > idx){
+      unit.onHex = map.player1StartLocations[idx];
+      battle.units[unit.id] = unit;
+      player.unitOrder.push(unit.id);
+      unit.commander = player.id;
+
+
+      battle.battleLog.push({
+        "action":"UnitPlacedOnHex",
+        "timestamp":Date.now(),
+        "actionData":{
+          "unit":unit.id,
+          "hex":unit.onHex
+        }
+      })
+    }
   });
 
   //make the players unit the active unit
