@@ -35,16 +35,41 @@ class socket {
         var user = AppData.Users[ws.userId];
         returnData.responseData.connectedUser = user;
       }
-      ws.send(JSON.stringify({"responseData":returnData.responseData, "response":returnData.response, "returnFunc":returnFunc}));
-    } if(returnData.broadcast === "all"){
+      if(ws.readyState === 1){
+        ws.send(JSON.stringify({"responseData":returnData.responseData, "response":returnData.response, "returnFunc":returnFunc}));
+      }else{
+        ws.terminate();
+        console.log('They sent a request then disconected... how rude.. KILL IT');
+      }
+    } else if(returnData.broadcast === "all"){
       var battle = AppData.battles[returnData.responseData.battle.id];
       battle.connections.forEach(function(con){
         console.log('sending via broadcast ',returnData.response);
         var user = AppData.Users[AppData.connections[con].userId];
         returnData.responseData.connectedUser = user;
-        AppData.connections[con].send(JSON.stringify({"responseData":returnData.responseData, "response":returnData.response, "returnFunc":returnFunc}));
+        if(AppData.connections[con].readyState === 1){
+          AppData.connections[con].send(JSON.stringify({"responseData":returnData.responseData, "response":returnData.response, "returnFunc":returnFunc}));
+        } else {
+          console.log("There is a socket that needs to be kilt in this battle");
+          battle.connections.splice(battle.connections.indexOf(con),1);
+          AppData.connections[con].terminate();
+          delete AppData.connections[con];
+        }
       });
-
+    } else if(returnData.broadcast === "universe") {
+      console.log(AppData.connections);
+      for (var con in AppData.connections){
+        console.log('Sending to every connection');
+        var user = AppData.Users[AppData.connections[con].userId];
+        returnData.responseData.connectedUser = user;
+        if(AppData.connections[con].readyState === 1){
+          AppData.connections[con].send(JSON.stringify({"responseData":returnData.responseData, "response":returnData.response, "returnFunc":returnFunc}));
+        } else {
+          console.log("There is a socket that needs to be kilt");
+          AppData.connections[con].terminate();
+          delete AppData.connections[con];
+        }
+      }
     }
   };
 
@@ -66,7 +91,7 @@ class socket {
         return; // go no futher until login is complete
       //if it is not asking to login, check the token.
       }
- 
+
       if(msg.hasOwnProperty("request") && msg.request === "logout"){
         for(var b in AppData.battles){
           var battle = AppData.battles[b];

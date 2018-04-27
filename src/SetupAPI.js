@@ -11,15 +11,31 @@ const SetupAPI = {
     next({"response":"updatedDatabase", "responseData":AppData.DB});
   },
 
+  getAllPVPBattles(msg,next){
+    battles = [];
+    var hostName = "";
+    for(var b in AppData.battles){
+      if(AppData.battles[b].waitingOnPlayer){//only pvp has waiting on player at this time
+        for(var c in AppData.battles[b].commanders){// should be only one at this time
+          console.log(AppData.Users[c]);
+          hostName = AppData.Users[c].username;
+        }
+        battles.push({
+          battle:b,
+          map:AppData.battles[b].map,
+          hostName:hostName,
+          hostId:c
+        });
+      }
+    }
+    next({"response":"pvpBattleList", "responseData":battles})
+  },
+
   getCommanderData(msg,next){
     //TODO if a password is added do not send the password.
-    console.log(msg.wsId);
-    console.log(AppData.connections);
-    console.log(AppData.Users);
-    
+
+
     var user = AppData.Users[AppData.connections[msg.wsId].userId];
-    console.log(user);
-    console.log("Here we need to see if there is an active battle");
     //TODO in the future looping through all the active battles is a really
     //really really bad idea
     var activeBattle = null;

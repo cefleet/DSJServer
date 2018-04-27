@@ -5,6 +5,7 @@ const UnitStarter = require("./UnitStarter");
 const TurnHandler = require("./TurnHandler");
 const AIHandler = require("./AIHandler");
 const UserHandler = require("./UserHandler");
+const CommanderStarter = require("./CommanderStarter");
 
 const AppData = require("./AppData.js");
 
@@ -35,11 +36,109 @@ const BattleAPI = {
       });
     }
 
-    next({"response":"battleCreated","responseData":{"battle":battle, "gridKeys":gridKeys}});
+    //if it is pvp then we need to brodcast it to the world
+    if(battle.waitingOnPlayer){
+      console.log('I am waiting o na pl')
+      next({"response":"battleCreated","responseData":{"battle":battle, "gridKeys":gridKeys}});
+      next({"broadcast":"universe","response":"PVPBattleCreated","responseData":{}});
+    } else {
+      next({"response":"battleCreated","responseData":{"battle":battle, "gridKeys":gridKeys}});
+    }
+  },
+
+  changePlayerStatus(msg,next){
+    console.log(msg);
+    var battle = AppData.battles[msg.requestData.battleId];
+    var com = battle.commanders[msg.requestData.commander];
+    if(AppData.connections[msg.wsId].userId === com.id){
+      if(com.ready){
+        com.ready = false;
+      } else {
+        com.ready = true;
+      }
+      var ready = true;
+      for(var c in battle.commanders){
+        if(!battle.commanders[c].ready){
+          ready = false;
+        }
+      }
+      if(ready){
+        battle.isReady = true;
+      } else {
+        battle.isReady = false;
+      }
+      next({"broadcast":"all","response":"playerStatusChanged","responseData":{"battle":battle}})
+    } else {
+      console.log("somebody is trying to cheat");
+    }
   },
 
   joinBattle(msg,next){
+    var battle = AppData.battles[msg.requestData.battleId];
 
+    if(battle.waitingOnPlayer){
+      battle.waitingOnPlayer = false;
+
+      var user = AppData.Users[AppData.connections[msg.wsId].userId];
+
+      //connect to the battle
+      battle.connections.push(msg.wsId);
+
+      var map = AppData.DB.map[battle.map];
+
+      //TODO make this pickable in te future
+      var newColor = "G";
+
+      for(var com in battle.commanders){
+        if(battle.commanders[com].color === "G"){
+          newColor = "Y";
+        }
+      }
+
+      var player = CommanderStarter(user);
+      battle.commanders[player.id] = player;
+      battle.commanders[player.id].playerIdent = "player2";
+      battle.commanders[player.id].color = newColor;
+      battle.commanders[player.id].ready = false;
+      //if there are units already.
+      user.units.forEach(function(unitData,idx){
+
+        var unit = UnitStarter(unitData);
+
+      //if there is enough players
+        if(map.player2StartLocations.length > idx){
+          unit.onHex = map.player2StartLocations[idx];
+          battle.units[unit.id] = unit;
+          player.unitOrder.push(unit.id);
+          unit.commander = player.id;
+
+          battle.battleLog.push({
+            "action":"UnitPlacedOnHex",
+            "timestamp":Date.now(),
+            "actionData":{
+              "unit":unit.id,
+              "hex":unit.onHex
+            }
+          })
+        }
+      });
+
+      var gridKeys = AppData.DB.map[battle.map].keyMap;
+      for(g in gridKeys){
+        var nighs = HexAPI.getNeighbors(HexAPI.hex(g));
+        gridKeys[g].neighbors = [];
+        nighs.forEach(function(n){
+          gridKeys[g].neighbors.push(n.q+'.'+n.r+'.'+n.s)
+        });
+      }
+
+      UserHandler.giveBattleToUser(AppData.connections[msg.wsId].userId, battle.id);
+      next({"broadcast":"all","response":"playerJoinedBattle","responseData":{"battle":battle, "gridKeys":gridKeys}});
+      next({"broadcast":"universe","response":"PVPBattleTaken","responseData":{}});
+
+    } else {
+      console.log('Somebody already grabbed this one');
+    }
   },
 
   getMapPoints(msg, next){

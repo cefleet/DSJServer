@@ -12,7 +12,7 @@ function BattleStarter(msg){
 
   var battle = {
     id:uuidv4(),
-    commanders:{},
+    commanders:{}, 
     units:{},
     activeUnit:null,
     battleLog:[],
@@ -22,7 +22,7 @@ function BattleStarter(msg){
     map:map.id,
     isReady:false,
     connections:[]
-  } 
+  }
 
   //setup The User's Commander who started the battle
   var player = CommanderStarter(user);
@@ -77,6 +77,9 @@ function BattleStarter(msg){
 
     //It is now ready
     battle.isReady = true;
+  } else {
+    battle.commanders[player.id].ready = false;
+    battle.waitingOnPlayer = true;
   }
 
   return battle;
