@@ -2,7 +2,7 @@ const AppData = require("./AppData");
 const fs = require("fs");
 const uuidv4 = require('uuid/v4');
 
-const UserHandler = { 
+const UserHandler = {
 
   createNewUser:function(email,username,id){
     id = id || uuidv4();
@@ -17,7 +17,7 @@ const UserHandler = {
         {"name":"Player DPS","shard":"63df7cf6-d95a-479a-a616-323065c95c92","dragon":"08d37765-89a5-4e96-923d-792cedde52b4","rider":"726b1e68-f13a-47b3-aba3-92d2a5fd255f","weapon":"bee9a6cc-c3e5-4cc9-84d3-283726aaaf19"},
       ],
       "riders":["8a4322ac-d2c6-4d36-b82a-ef7e703cf0da","726b1e68-f13a-47b3-aba3-92d2a5fd255f","4e52cb1c-db3e-4fb0-a8c3-3a1a0ae66ab7"],
-      "dragons":["a4005bcc-a2fb-477a-b32d-888712886181","08d37765-89a5-4e96-923d-792cedde52b4","ff97bae6-369e-4df7-8953-a57275959319"],
+      "dragons":["a4005bcc-a2fb-477a-b32d-888712886181","08d37765-89a5-4e96-923d-792cedde52b4","ff97bae6-369e-4df7-8953-a57275959319","c1ac71fc-7639-4ee5-803f-af72bc565b54","eb13a94d-c732-40ec-b27c-7a007012437c","ed035dae-6b3d-4336-9d3f-eb98ddd604b4"],
       "weapons":["b39b05bd-f3ee-41a5-a4a2-8506533b7022","bee9a6cc-c3e5-4cc9-84d3-283726aaaf19","6c4abaa6-40ce-489b-8f91-1456e12b1160"],
       "maps":["586d621d-5770-408e-8e83-12ba47c39527"]
     }

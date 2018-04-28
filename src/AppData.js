@@ -7,7 +7,7 @@ const AppData = {
     updated:Date.now()
   }
 }
-
+ 
 //LOADS DATABASE
 var files = fs.readdirSync("./data/");
 files.forEach(function(file){

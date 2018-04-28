@@ -11,7 +11,7 @@ function CommanderStarter(data){
     curUnit: 0,
     unitOrder:[]
   }
-  return commander;
+  return commander;   
 }
 
 module.exports = CommanderStarter;

@@ -12,7 +12,7 @@ function BattleStarter(msg){
 
   var battle = {
     id:uuidv4(),
-    commanders:{}, 
+    commanders:{},
     units:{},
     activeUnit:null,
     battleLog:[],
@@ -50,7 +50,7 @@ function BattleStarter(msg){
           "hex":unit.onHex
         }
       })
-    }
+    } 
   });
 
   //make the players unit the active unit

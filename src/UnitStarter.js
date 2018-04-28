@@ -51,7 +51,7 @@ function UnitStarter(data){
     }
     unit.parts = {
       "monster":data.monster,
-      "shard":data.shard
+      "shard":data.shard 
     };
   } else {
     //its a rider
@@ -70,7 +70,13 @@ function UnitStarter(data){
     unit.thirdAbility = weapon.ultimateAbility; // change this is nthe editor
     unit.images = {
       "shard":AppData.DB.shard[data.shard].image,
-      "dragon":AppData.DB.dragon[data.dragon].image,
+      "dragon":{
+        "bodyType":AppData.DB.dragon[data.dragon].bodyType,
+        "bodyColor":AppData.DB.dragon[data.dragon].bodyColor,
+        "wingColor":AppData.DB.dragon[data.dragon].wingColor,
+        "wingPos":AppData.DB.dragon[data.dragon].wingPos,
+        "extra":AppData.DB.dragon[data.dragon].extra
+      },
       "rider":AppData.DB.rider[data.rider].image,
       "weapon":AppData.DB.weapon[data.weapon].image
     }
