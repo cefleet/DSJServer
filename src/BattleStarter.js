@@ -6,6 +6,7 @@ const uuidv4 = require('uuid/v4');
 function BattleStarter(msg){
   var map;
   if(msg.hasOwnProperty("requestData")){
+    //redis
     map = AppData.DB.map[msg.requestData.mapId];
   };
   var user = AppData.Users[AppData.connections[msg.wsId].userId];
@@ -50,7 +51,7 @@ function BattleStarter(msg){
           "hex":unit.onHex
         }
       })
-    } 
+    }
   });
 
   //make the players unit the active unit

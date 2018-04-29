@@ -152,7 +152,7 @@ const TurnHandler = {
       sender.didAbility = true;
       changes.units[sender.id].didAbility = true;
       changes.units[sender.id]._energy = sender._energy;
-      var gameOver = false;
+      var battleOver = false;
       results.success.abilityResults.forEach(function(result){
         if(!changes.units.hasOwnProperty(result.receiver)){
           changes.units[result.receiver] = {};
@@ -236,24 +236,25 @@ const TurnHandler = {
             logItem.actionData.results.push({
               "unit":unit.id,
               "statusChange":"IsTotalDesperation"
-            }); 
+            });
           } else if(commander.unitOrder.length === 0){
             battle.battleOver = true;
-            gameOver = {
-              "action":"GameOver",
+            battleOver = {
+              "action":"BattleOver",
               "timestamp":Date.now()
             }
 
             for(comId in battle.commanders){
               if(battle.commanders[comId].unitOrder.length > 0){
                 console.log('winner');
-                if(AppData.Users.hasOwnProperty(comId)){
+                if(battle.commanders[comId].controlType === "Player"){
                   console.log("winner is a user!");
                   UserHandler.giveUserMapRewards(comId, battle.map);
                   console.log("send user request");
                 }
               }
             }
+
           }
         }
       });
@@ -264,9 +265,8 @@ const TurnHandler = {
       battle.battleLog.push(logItem);//mutates battle
 
       if(battle.battleOver){
-        changes.battleLog.push(gameOver);
-        battle.battleLog.push(gameOver);
-
+        changes.battleLog.push(battleOver);
+        battle.battleLog.push(battleOver);
 
       }
 

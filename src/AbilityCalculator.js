@@ -1,5 +1,4 @@
 const HexAPI = require("./HexAPI.js");
-const AppData = require("./AppData.js");
 
 class AbilityCalculator {
 

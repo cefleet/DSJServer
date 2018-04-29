@@ -6,35 +6,47 @@ const UserHandler = {
 
   createNewUser:function(email,username,id){
     id = id || uuidv4();
-    var user = {
-      "username":username,
-      "email":email,
-      "id":id,
-      "battles":[],
-      "color":"G",
-      "units":[
-        {"name":"Player Healer","shard":"cbe0cae3-96bf-4eb8-90bd-50e09a89ae33","dragon":"a4005bcc-a2fb-477a-b32d-888712886181","rider":"8a4322ac-d2c6-4d36-b82a-ef7e703cf0da","weapon":"b39b05bd-f3ee-41a5-a4a2-8506533b7022"},
-        {"name":"Player DPS","shard":"63df7cf6-d95a-479a-a616-323065c95c92","dragon":"08d37765-89a5-4e96-923d-792cedde52b4","rider":"726b1e68-f13a-47b3-aba3-92d2a5fd255f","weapon":"bee9a6cc-c3e5-4cc9-84d3-283726aaaf19"},
-      ],
-      "riders":["8a4322ac-d2c6-4d36-b82a-ef7e703cf0da","726b1e68-f13a-47b3-aba3-92d2a5fd255f","4e52cb1c-db3e-4fb0-a8c3-3a1a0ae66ab7"],
-      "dragons":["a4005bcc-a2fb-477a-b32d-888712886181","08d37765-89a5-4e96-923d-792cedde52b4","ff97bae6-369e-4df7-8953-a57275959319","c1ac71fc-7639-4ee5-803f-af72bc565b54","eb13a94d-c732-40ec-b27c-7a007012437c","ed035dae-6b3d-4336-9d3f-eb98ddd604b4"],
-      "weapons":["b39b05bd-f3ee-41a5-a4a2-8506533b7022","bee9a6cc-c3e5-4cc9-84d3-283726aaaf19","6c4abaa6-40ce-489b-8f91-1456e12b1160"],
-      "maps":["586d621d-5770-408e-8e83-12ba47c39527"]
-    }
+    //this needs to be in data
+    var user = JSON.parse(fs.readFileSync("defaultUser.json", "utf8"));
+    user.email = email;
+    user.username = username;
+    user.id = id;
 
-    AppData.Users[user.id] = user;
+    AppData.Users[id] = user;
+
     //write the new user
+    fs.writeFile("Users/"+id+'.db', JSON.stringify(user), "utf8", function(err){
+      if(err){
+        console.log(err)
+      } else {
+        console.log("User "+id+" saved!");
+      }
+    });
+    /*
     fs.writeFile('users.db', JSON.stringify(AppData.Users), 'utf8', function(){
       console.log(this);
     });
+    */
   },
 
   giveBattleToUser:function(userId,battleId){
     AppData.Users[userId].battles.push(battleId);
 
+    var user = AppData.Users[userId];
+
+    fs.writeFile("Users/"+userId+'.db', JSON.stringify(user), "utf8", function(err){
+      if(err){
+        console.log(err)
+      } else {
+        console.log("User "+userId+" saved!");
+      }
+    });
+
+/*
     fs.writeFile('users.db', JSON.stringify(AppData.Users), 'utf8', function(){
       console.log(this);
     });
+    */
   },
 
   giveUserMapRewards: function(userId,mapId){
@@ -59,10 +71,18 @@ const UserHandler = {
       user.maps.splice(user.maps.indexOf(mapId),1);
     }
 
+    fs.writeFile("Users/"+userId+'.db', JSON.stringify(user), "utf8", function(err){
+      if(err){
+        console.log(err)
+      } else {
+        console.log("User "+userId+" saved!");
+      }
+    });
+/*
     fs.writeFile('users.db', JSON.stringify(AppData.Users), 'utf8', function(){
       console.log(this);
     });
-
+*/
   }
 }
 

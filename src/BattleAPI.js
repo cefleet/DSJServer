@@ -6,6 +6,7 @@ const TurnHandler = require("./TurnHandler");
 const AIHandler = require("./AIHandler");
 const UserHandler = require("./UserHandler");
 const CommanderStarter = require("./CommanderStarter");
+const fs = require("fs");
 
 const AppData = require("./AppData.js");
 
@@ -76,6 +77,13 @@ const BattleAPI = {
   joinBattle(msg,next){
     var battle = AppData.battles[msg.requestData.battleId];
 
+    if(!battle){
+
+      console.log('No battle')
+      next({"response":"PVPBattleTaken","responseData":{}});
+      return false;
+    }
+
     if(battle.waitingOnPlayer){
       battle.waitingOnPlayer = false;
 
@@ -88,22 +96,41 @@ const BattleAPI = {
 
       //TODO make this pickable in te future
       var newColor = "G";
-
       for(var com in battle.commanders){
-        if(battle.commanders[com].color === "G"){
+        if(battle.commanders[com].shardColor=== "G"){
           newColor = "Y";
         }
       }
 
+      console.log(newColor);
       var player = CommanderStarter(user);
       battle.commanders[player.id] = player;
       battle.commanders[player.id].playerIdent = "player2";
-      battle.commanders[player.id].color = newColor;
+      battle.commanders[player.id].shardColor = newColor;
       battle.commanders[player.id].ready = false;
       //if there are units already.
       user.units.forEach(function(unitData,idx){
-
-        var unit = UnitStarter(unitData);
+        var modUnit = Object.assign({},unitData);
+        var oldShard = AppData.DB.shard[modUnit.shard];
+        if(oldShard.color != newColor){
+          for(var sId in AppData.DB.shard){
+            var usable = false;
+            if(AppData.DB.shard[sId].color === newColor){
+              usable = true;
+              for(var u in battle.units){
+                console.log(battle.units[u]);
+                if(battle.units[u].parts.shard === sId){
+                  usable = false;
+                }
+              }
+            }
+            if(usable){
+              modUnit.shard = sId;
+              break;
+            }
+          }
+        }
+        var unit = UnitStarter(modUnit);
 
       //if there is enough players
         if(map.player2StartLocations.length > idx){
@@ -121,6 +148,7 @@ const BattleAPI = {
             }
           })
         }
+
       });
 
       var gridKeys = AppData.DB.map[battle.map].keyMap;
@@ -143,6 +171,7 @@ const BattleAPI = {
 
   getMapPoints(msg, next){
     var battle = AppData.battles[msg.requestData.battleId];
+    //redis
     var map = AppData.DB.map[battle.map];
     var points = {};
     for(h in map.keyMap){
@@ -160,6 +189,7 @@ const BattleAPI = {
     var battle = AppData.battles[msg.requestData.battleId]
     //add this active connection to the battle
     battle.connections.push(msg.wsId);
+    //redis
     var gridKeys = AppData.DB.map[battle.map].keyMap;
     for(g in gridKeys){
       var nighs = HexAPI.getNeighbors(HexAPI.hex(g));
@@ -177,6 +207,17 @@ const BattleAPI = {
     var battle = AppData.battles[msg.requestData.battleId];
     battle.isActive=false;
     //battle.connections = [];
+
+    var saveBattle = Object.assign({},battle);
+    fs.writeFile("Battles/"+saveBattle.id+'.db', JSON.stringify(battle),function(err){
+      if(err){
+        console.log(err);
+      } else {
+        console.log("Battle Saved");
+        delete AppData.battles[battle.id];
+
+      }
+    });
     next({"broadcast":"all","response":"battleClosed", "responseData":{"battle":battle}});
   },
 
@@ -381,9 +422,24 @@ const BattleAPI = {
           }
 
           changes.activeUnit = battle.activeUnit;
+          changes.battleLog = logItems;
+          next({"broadcast":"all","response":"nextTurn","responseData":{"battle":battle,"changes":changes}})
+        } else {
+          console.log('Send The battle Results');
+          changes.battleLog = logItems;
+          next({"broadcast":"all","response":"nextTurn","responseData":{"battle":battle,"changes":changes}});
+          var saveBattle = Object.assign({},battle);
+          fs.writeFile("Battles/"+saveBattle.id+'.db', JSON.stringify(saveBattle),function(err){
+            if(err){
+              console.log(err);
+            } else {
+              console.log("Battle Saved");
+              delete AppData.battles[battle.id];
+
+            }
+          });
         }
-        changes.battleLog = logItems;
-        next({"broadcast":"all","response":"nextTurn","responseData":{"battle":battle,"changes":changes}})
+
 
       }//afterAI
 
@@ -403,6 +459,8 @@ const BattleAPI = {
   },
   getTargetableList(msg,next){
     var battle = AppData.battles[msg.requestData.battleId];
+
+    //redis
     var ability = AppData.DB.ability[msg.requestData.ability];
     var unit = battle.units[msg.requestData.unit];
 
@@ -421,6 +479,7 @@ const BattleAPI = {
   getAffectedList(msg,next){
     var battle = AppData.battles[msg.requestData.battleId];
     var units = battle.units;
+    //redis
     var ability = AppData.DB.ability[msg.requestData.ability];
     var sender = battle.units[msg.requestData.unit];
     var receiver = battle.units[msg.requestData.target];
@@ -432,6 +491,8 @@ const BattleAPI = {
   doAbility(msg, next){
 
     var battle = AppData.battles[msg.requestData.battleId];
+
+    //redis
     var ability = AppData.DB.ability[msg.requestData.ability];
     var sender = battle.units[msg.requestData.sender];
     var receiver = battle.units[msg.requestData.receiver];
@@ -450,6 +511,21 @@ const BattleAPI = {
            "changes":changes
         }
       });
+
+      if(battle.battleOver){
+        console.log('Save the battle to file');
+        var saveBattle = Object.assign({},battle);
+        fs.writeFile("Battles/"+saveBattle.id+'.db', JSON.stringify(battle),function(err){
+          if(err){
+            console.log(err);
+          } else {
+            console.log("Battle Saved");
+            delete AppData.battles[battle.id];
+            console.log("Delete the Battle");
+          }
+        });
+
+      }
     } else {
       next({
         "response":"abilityNotDone",

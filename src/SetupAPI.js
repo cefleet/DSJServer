@@ -1,6 +1,6 @@
 const uuidv4 = require('uuid/v4');
 const AppData = require("./AppData.js");
-
+const fs = require("fs");
 
 const SetupAPI = {
   getDatabaseStatus(msg, next){
@@ -32,17 +32,23 @@ const SetupAPI = {
   },
 
   getCommanderData(msg,next){
-    //TODO if a password is added do not send the password.
-
 
     var user = AppData.Users[AppData.connections[msg.wsId].userId];
-    //TODO in the future looping through all the active battles is a really
-    //really really bad idea
+
+    if(!user){
+      if(fs.existsSync("Users/"+AppData.connections[msg.wsId].userId+".db")){
+        user = JSON.parse(fs.readFileSync("Users/"+AppData.connections[msg.wsId].userId+".db"));
+        AppData.Users[AppData.connections[msg.wsId].userId] = user;
+      } else {
+        next({"response":"tokenBad"});
+        return;
+      }
+    }
     var activeBattle = null;
-    //AppData.battles.forEach(function(battle){
+
     for(var b in AppData.battles){
       var battle = AppData.battles[b];
-      if(!battle.battleOver && battle.isActive){
+      if(!battle.battleOver && battle.isActive){ 
         for(c in battle.commanders){
           if(c === AppData.connections[msg.wsId].userId){
             activeBattle = b;
@@ -50,7 +56,7 @@ const SetupAPI = {
         }
       }
     }
-  //  });
+
     next({"response":"userData", "responseData":{user:user,activeBattle:activeBattle}})
   },
 

@@ -1,4 +1,3 @@
-const AppData = require("./AppData");
 const uuidv4 = require('uuid/v4');
 
 function CommanderStarter(data){
@@ -11,7 +10,7 @@ function CommanderStarter(data){
     curUnit: 0,
     unitOrder:[]
   }
-  return commander;   
+  return commander;
 }
 
 module.exports = CommanderStarter;

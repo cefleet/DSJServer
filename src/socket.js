@@ -32,6 +32,7 @@ class socket {
       console.log('sending ', returnData.response);
 
       if(typeof returnData.responseData === "object"){
+        //redis
         var user = AppData.Users[ws.userId];
         returnData.responseData.connectedUser = user;
       }
@@ -43,8 +44,12 @@ class socket {
       }
     } else if(returnData.broadcast === "all"){
       var battle = AppData.battles[returnData.responseData.battle.id];
+      if(!battle){
+        return false;
+      }
       battle.connections.forEach(function(con){
         console.log('sending via broadcast ',returnData.response);
+        //redis
         var user = AppData.Users[AppData.connections[con].userId];
         returnData.responseData.connectedUser = user;
         if(AppData.connections[con].readyState === 1){
@@ -60,6 +65,7 @@ class socket {
       console.log(AppData.connections);
       for (var con in AppData.connections){
         console.log('Sending to every connection');
+        //redis
         var user = AppData.Users[AppData.connections[con].userId];
         returnData.responseData.connectedUser = user;
         if(AppData.connections[con].readyState === 1){

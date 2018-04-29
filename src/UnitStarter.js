@@ -34,7 +34,9 @@ function UnitStarter(data){
 
   //its a monster
   if(data.hasOwnProperty("monster")){
+    //redis
     var monster = AppData.DB.monster[data.monster];
+    var shard = AppData.DB.shard[data.shard];
     unit.name = Number(monster.name);
     unit.hp = Number(monster.hp);
     unit.speed = Number(monster.speed);
@@ -46,18 +48,19 @@ function UnitStarter(data){
     unit.secondAbility = monster.secondAbility;
     unit.thirdAbility = monster.thridAbility;
     unit.images = {
-      "shard":AppData.DB.shard[data.shard].image,
-      "monster":AppData.DB.monster[data.monster].image
+      "shard":shard.image,
+      "monster":monster.image
     }
     unit.parts = {
       "monster":data.monster,
-      "shard":data.shard 
+      "shard":data.shard
     };
   } else {
     //its a rider
     var rider = AppData.DB.rider[data.rider];
     var weapon = AppData.DB.weapon[data.weapon];
     var dragon = AppData.DB.dragon[data.dragon];
+    var shard = AppData.DB.shard[data.shard];
 
     unit.hp = Number(rider.hp)+Number(dragon.hp);
     unit.speed = Number(rider.speed)+Number(dragon.speed);
@@ -69,16 +72,16 @@ function UnitStarter(data){
     unit.secondAbility = weapon.specialAbility;//change this in the edirot
     unit.thirdAbility = weapon.ultimateAbility; // change this is nthe editor
     unit.images = {
-      "shard":AppData.DB.shard[data.shard].image,
+      "shard":shard.image,
       "dragon":{
-        "bodyType":AppData.DB.dragon[data.dragon].bodyType,
-        "bodyColor":AppData.DB.dragon[data.dragon].bodyColor,
-        "wingColor":AppData.DB.dragon[data.dragon].wingColor,
-        "wingPos":AppData.DB.dragon[data.dragon].wingPos,
-        "extra":AppData.DB.dragon[data.dragon].extra
+        "bodyType":dragon.bodyType,
+        "bodyColor":dragon.bodyColor,
+        "wingColor":dragon.wingColor,
+        "wingPos":dragon.wingPos,
+        "extra":dragon.extra
       },
-      "rider":AppData.DB.rider[data.rider].image,
-      "weapon":AppData.DB.weapon[data.weapon].image
+      "rider":rider.image,
+      "weapon":weapon.image
     }
     unit.parts = {
       "rider":data.rider,
