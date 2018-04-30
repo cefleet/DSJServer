@@ -19,8 +19,8 @@
 			"weapon": "bee9a6cc-c3e5-4cc9-84d3-283726aaaf19"
 		}
 	],
-	"riders": ["8a4322ac-d2c6-4d36-b82a-ef7e703cf0da", "414e86b6-c28d-4665-9fd4-8ace4b25c45b", "d497d6f2-85ba-47ac-82be-fb3b13639c2f", "02138d28-cfcf-4d36-9baf-3a45723c7e58", "726b1e68-f13a-47b3-aba3-92d2a5fd255f"],
-	"dragons": ["a4005bcc-a2fb-477a-b32d-888712886181", "08d37765-89a5-4e96-923d-792cedde52b4", "ff97bae6-369e-4df7-8953-a57275959319", "c1ac71fc-7639-4ee5-803f-af72bc565b54", "eb13a94d-c732-40ec-b27c-7a007012437c"],
-	"weapons": ["b39b05bd-f3ee-41a5-a4a2-8506533b7022", "f98754fa-105f-4b12-b995-2cc3395593af", "bee9a6cc-c3e5-4cc9-84d3-283726aaaf19", "6c4abaa6-40ce-489b-8f91-1456e12b1160"],
+	"riders": ["8a4322ac-d2c6-4d36-b82a-ef7e703cf0da", "726b1e68-f13a-47b3-aba3-92d2a5fd255f"],
+	"dragons": ["a4005bcc-a2fb-477a-b32d-888712886181", "08d37765-89a5-4e96-923d-792cedde52b4"],
+	"weapons": ["b39b05bd-f3ee-41a5-a4a2-8506533b7022", "bee9a6cc-c3e5-4cc9-84d3-283726aaaf19"],
 	"maps": ["586d621d-5770-408e-8e83-12ba47c39527"]
 }

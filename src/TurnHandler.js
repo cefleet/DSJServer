@@ -4,8 +4,12 @@ const UserHandler = require("./UserHandler");
 const TurnHandler = {
   startTurn: function(unitId,battleId){
     var unit = AppData.battles[battleId].units[unitId];
-
     var uChanges = {};
+
+    if(!unit){
+      console.log('There is a major error where the unit no longer exists..');
+      return uChanges;
+    }
 
     if(unit.didAbility){
       unit.didAbility = false;
@@ -160,8 +164,8 @@ const TurnHandler = {
         units[result.receiver][ability.affectedAttribute] = Number(units[result.receiver][ability.affectedAttribute])+Number(result.value);
         //if it is HP or energy it is handled differently
 
-      //  console.log("INSTANT KILL");
-    //    units[result.receiver]._hp = 0;
+        console.log("INSTANT KILL");
+        units[result.receiver]._hp = 0;
 
         if(ability.affectedAttribute === "_hp" || ability.affectedAttribute === "_energy"){
           if(units[result.receiver][ability.affectedAttribute] > units[result.receiver][ability.affectedAttribute.replace("_",'')]){

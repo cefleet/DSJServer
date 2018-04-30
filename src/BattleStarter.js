@@ -43,6 +43,7 @@ function BattleStarter(msg){
       unit.commander = player.id;
 
 
+      /*
       battle.battleLog.push({
         "action":"UnitPlacedOnHex",
         "timestamp":Date.now(),
@@ -51,6 +52,7 @@ function BattleStarter(msg){
           "hex":unit.onHex
         }
       })
+      */
     }
   });
 
@@ -66,6 +68,7 @@ function BattleStarter(msg){
       battle.units[unit.id] = unit;
       monsters.unitOrder.push(unit.id);
       unit.commander = monsters.id;
+      /*
       battle.battleLog.push({
         "action":"UnitPlacedOnHex",
         "timestamp":Date.now(),
@@ -74,6 +77,7 @@ function BattleStarter(msg){
           "hex":unit.onHex
         }
       })
+      */
     });
 
     //It is now ready

@@ -102,7 +102,6 @@ const BattleAPI = {
         }
       }
 
-      console.log(newColor);
       var player = CommanderStarter(user);
       battle.commanders[player.id] = player;
       battle.commanders[player.id].playerIdent = "player2";
@@ -223,6 +222,10 @@ const BattleAPI = {
 
   startBattle(msg, next){
     var battle = AppData.battles[msg.requestData.battleId];
+
+    var startingData = Object.assign({},battle);
+    battle.startingData = startingData;
+
     var logItems = [{
       "action":"BattleStarted",
       "timestamp":Date.now()
@@ -276,6 +279,10 @@ const BattleAPI = {
 
     if(comm.unitOrder.indexOf(unit.id) < 0){
       comm.unitOrder.push(unit.id)
+    }
+
+    var changes = {
+
     }
 
     //does't matter which one because the battle is going to be updated
@@ -363,10 +370,9 @@ const BattleAPI = {
             }
             for(p in res.units[u]){
               changes.units[u][p] = res.units[u][p]
-            }
+              }
           }
         });
-
 
         var AIEndTurnChanges = TurnHandler.endTurn(battle.activeUnit,battle.id);
         logItems.push({
@@ -389,19 +395,38 @@ const BattleAPI = {
           startUnitCommander.curUnit = 0;
         }
 
+        //test it here
+        if(!battle.units.hasOwnProperty(startUnitCommander.unitOrder[startUnitCommander.curUnit])){
+          console.log('JUst setting it back to zero because something went wrong.')
+          startUnitCommander.curUnit = 0;
+        }
+
         if(!changes.commanders.hasOwnProperty(startUnitCommander.id)){
           changes.commanders[startUnitCommander.id] = {};
         }
         changes.commanders[startUnitCommander.id].curUnit = startUnitCommander.curUnit;
 
+
         //this is a repeat of above. refractor
         for(c in battle.commanders){
-          if(c != startUnitCommander.id){
+          if(c !== startUnitCommander.id){
+            if(!battle.commanders[c].curUnit >= battle.commanders[c].unitOrder.length){
+              battle.commanders[c].curUnit = 0;
+              console.log('Something has become messed up. Just trtying to fix it');
+            }
             battle.activeUnit = battle.commanders[c].unitOrder[battle.commanders[c].curUnit];
+            if(!battle.activeUnit){
+              console.log("Still some issue, but setting the unit to 0 should wokr")
+              battle.commanders[c].curUnit = 0;
+              battle.activeUnit =battle.commanders[c].unitOrder[0];
+            }
           }
         }
 
       if(!battle.battleOver){
+        console.log("Attempting to start Turn");
+        console.log(battle.activeUnit);
+
         var afterAIstartTurnUnitChanges = TurnHandler.startTurn(battle.activeUnit,battle.id);
         if(!changes.units.hasOwnProperty(battle.activeUnit)){
           changes.units[battle.activeUnit]= {};
@@ -567,7 +592,7 @@ const BattleAPI = {
 
     for(var u in battle.units){
       for(var i = 0; i < path.length; i++){
-        if(battle.units[u].onHex === path[i].id){
+        if(battle.units[u].onHex === path[i].id && !battle.units[u].hasFallen){
           console.log('There is something on the path');
           next({"response":"somethingOnPath","responseData":{}});
           return;

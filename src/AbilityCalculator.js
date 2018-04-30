@@ -208,16 +208,17 @@ class AbilityCalculator {
         }
         i++;
       }
-      units = newUnits;
+      units = newUnits; 
     }
     for(var u in units){
       if(
         (
           (units[u].commander === sender.commander && ability.affects === 'ally') ||
           (units[u].commander !== sender.commander && ability.affects === 'enemy')
-        ) && (
+        ) &&
           HexAPI.getDistanceBetweenHexes(HexAPI.hex(sender.onHex), HexAPI.hex(units[u].onHex)) <= ability.range
-        )
+          &&
+         !units[u].hasFallen
       ) {
         targetable.push(units[u].id);
       }

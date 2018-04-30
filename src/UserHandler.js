@@ -59,8 +59,23 @@ const UserHandler = {
         //Rewards can be dragons,riders,weapons,
         if(reward.type === "newMap"){
           if(user.maps.indexOf(reward.mapId) < 0){//if player doesn't already have it
-          console.log("adding reward");
+            console.log("adding reward");
             user.maps.push(reward.mapId);
+          }
+        } else if(reward.type ==="newDragon"){
+          if(user.dragons.indexOf(reward.dragonId) < 0){//if player doesn't already have it
+            console.log("adding reward");
+            user.dragons.push(reward.dragonId);
+          }
+        } else if(reward.type ==="newRider"){
+          if(user.riders.indexOf(reward.riderId) < 0){//if player doesn't already have it
+            console.log("adding reward");
+            user.riders.push(reward.riderId);
+          }
+        } else if(reward.type ==="newWeapon"){
+          if(user.weapons.indexOf(reward.weaponId) < 0){//if player doesn't already have it
+            console.log("adding reward");
+            user.weapons.push(reward.weaponId);
           }
         }
       });
