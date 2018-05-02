@@ -24,6 +24,7 @@ class socket {
 
 //ws and returnFunc comes from the binding
   respond(ws,returnFunc,returnData){
+
     if(!ws){
       return {"error":"The Websocket was lost"};
     }
@@ -37,17 +38,20 @@ class socket {
         returnData.responseData.connectedUser = user;
       }
       if(ws.readyState === 1){
+        console.log(returnData);
         ws.send(JSON.stringify({"responseData":returnData.responseData, "response":returnData.response, "returnFunc":returnFunc}));
       }else{
         ws.terminate();
         console.log('They sent a request then disconected... how rude.. KILL IT');
       }
     } else if(returnData.broadcast === "all"){
+      var removeList = [];
       var battle = AppData.battles[returnData.responseData.battle.id];
       if(!battle){
         return false;
       }
-      battle.connections.forEach(function(con){
+      battle.connections.forEach(function(con, idx){
+
         console.log('sending via broadcast ',returnData.response);
         //redis
         var user = AppData.Users[AppData.connections[con].userId];
@@ -55,14 +59,21 @@ class socket {
         if(AppData.connections[con].readyState === 1){
           AppData.connections[con].send(JSON.stringify({"responseData":returnData.responseData, "response":returnData.response, "returnFunc":returnFunc}));
         } else {
-          console.log("There is a socket that needs to be kilt in this battle");
-          battle.connections.splice(battle.connections.indexOf(con),1);
-          AppData.connections[con].terminate();
-          delete AppData.connections[con];
+          removeList.push(con);
         }
       });
+      var i = removeList.length-1;
+      while(i > 0){
+        console.log(i);
+        if(AppData.connections[removeList[i]]){
+          AppData.connections[removeList[i]].terminate();
+          battle.connections.splice(battle.connections.indexOf(removeList[i]),1);
+          delete AppData.connections[removeList[i]];
+        }
+        i--;
+      }
     } else if(returnData.broadcast === "universe") {
-      console.log(AppData.connections);
+
       for (var con in AppData.connections){
         console.log('Sending to every connection');
         //redis
@@ -72,8 +83,10 @@ class socket {
           AppData.connections[con].send(JSON.stringify({"responseData":returnData.responseData, "response":returnData.response, "returnFunc":returnFunc}));
         } else {
           console.log("There is a socket that needs to be kilt");
-          AppData.connections[con].terminate();
-          delete AppData.connections[con];
+          if(AppData.connections[con]){
+            AppData.connections[con].terminate();
+            delete AppData.connections[con];
+          }
         }
       }
     }
@@ -89,9 +102,13 @@ class socket {
     ws.on('message', function incoming(message){
       var msg = this.parseJSON(message);
       //If it is requesting to login allow it to do so.
+      if(!msg){
+        console.log('The JSON was bad');
+        return null;
+      }
+
       if(msg.hasOwnProperty("request") && msg.request === "login"){
         var results = Auth.checkCredentials(msg);
-        console.log(results);
         ws.userId = results.userId;
         this.respond(ws,msg.returnFunc, results.send);
         return; // go no futher until login is complete
@@ -114,34 +131,39 @@ class socket {
         });
         return;
       }
-
-      var authData = Auth.isTokenValid(msg);
+      var authData;
+      var isSpectator;
+      if(msg.hasOwnProperty("isSpectator") && msg.isSpectator){
+        isSpectator = true;
+        authData = {
+          userId:"spectator_"+uuidv4()
+        }
+      } else {
+        authData = Auth.isTokenValid(msg);
+      }
       if(!authData){
         this.respond(ws,msg.returnFunc,{"responseData":{"error":"Needs To Login"}, "response":"needsToLogin"});
         return;//stops from going futher gotta get that token checked out
-      } else if(msg.hasOwnProperty("request") && msg.request === "checkToken"){
+      } else if(msg.hasOwnProperty("request") && msg.request === "checkToken" && !isSpectator){
         this.respond(ws,msg.returnFunc,{"response":"tokenIsGood"});
       } else {
         //TODO NEEDS SOME KIND OF SECURITY CHWECK HERE
-        console.log(authData);
         ws.userId = authData.userId;
       }
 
       if(msg){
         msg.wsId = ws.id;
         if(msg.hasOwnProperty("system")){
-          //action could be setup or any other things. I need to modifiy the client to handle all of this correctly
           switch (msg.system){
 
             case "battle":
-              console.log(msg.request);
               if(BattleAPI.hasOwnProperty(msg.request)){
                 BattleAPI[msg.request](msg,this.respond.bind(this,ws,msg.returnFunc));
               }
               return;
             case "manage":
               console.log('None Yet');
-
+              return;
             case "setup":
               console.log('Setting Up something;')
               if(SetupAPI.hasOwnProperty(msg.request)){

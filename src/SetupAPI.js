@@ -11,13 +11,42 @@ const SetupAPI = {
     next({"response":"updatedDatabase", "responseData":AppData.DB});
   },
 
+  getAllBattles(msg,next){
+    var battles = [];
+    var hostName = "";
+    var hostId;
+    for(var b in AppData.battles){
+      if(!AppData.battles[b].private){
+        var i = 0;
+        for(var c in AppData.battles[b].commanders){// should be only one at this time
+          var tag = "";
+          if(i ===1){
+            tag = " VS ";
+          } else {
+            hostId = c;
+          }
+          var name;
+
+          hostName += tag+AppData.battles[b].commanders[c].name;
+          i++;
+        }
+        battles.push({
+          battle:b,
+          map:AppData.battles[b].map,
+          hostName:hostName,
+          hostId:hostId
+        });
+      }
+    }
+    next({"response":"fullBattleList", "responseData":battles})
+  },
+
   getAllPVPBattles(msg,next){
-    battles = [];
+    var battles = [];
     var hostName = "";
     for(var b in AppData.battles){
-      if(AppData.battles[b].waitingOnPlayer){//only pvp has waiting on player at this time
+      if(AppData.battles[b].waitingOnPlayer && !AppData.battles[b].private){//only pvp has waiting on player at this time
         for(var c in AppData.battles[b].commanders){// should be only one at this time
-          console.log(AppData.Users[c]);
           hostName = AppData.Users[c].username;
         }
         battles.push({
@@ -48,7 +77,7 @@ const SetupAPI = {
 
     for(var b in AppData.battles){
       var battle = AppData.battles[b];
-      if(!battle.battleOver && battle.isActive){ 
+      if(!battle.battleOver && battle.isActive){
         for(c in battle.commanders){
           if(c === AppData.connections[msg.wsId].userId){
             activeBattle = b;

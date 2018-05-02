@@ -39,11 +39,15 @@ const BattleAPI = {
 
     //if it is pvp then we need to brodcast it to the world
     if(battle.waitingOnPlayer){
-      console.log('I am waiting o na pl')
       next({"response":"battleCreated","responseData":{"battle":battle, "gridKeys":gridKeys}});
-      next({"broadcast":"universe","response":"PVPBattleCreated","responseData":{}});
+      if(!battle.private){
+        next({"broadcast":"universe","response":"PVPBattleCreated","responseData":{}});
+      }
     } else {
       next({"response":"battleCreated","responseData":{"battle":battle, "gridKeys":gridKeys}});
+      if(!battle.private){
+        next({"broadcast":"universe","response":"PVEBattleCreated","responseData":{}});
+      }
     }
   },
 
@@ -80,8 +84,27 @@ const BattleAPI = {
     if(!battle){
 
       console.log('No battle')
-      next({"response":"PVPBattleTaken","responseData":{}});
+      next({"response":"BattleNotAvalible","responseData":{}});
       return false;
+    }
+
+    //this is joined as a spectator
+    if(msg.requestData.joinAsSpectator && !battle.private){
+      console.log('Im joing as spectatr');
+      console.log(msg.wsId);
+      battle.connections.push(msg.wsId);
+
+      var gridKeys = AppData.DB.map[battle.map].keyMap;
+      for(g in gridKeys){
+        var nighs = HexAPI.getNeighbors(HexAPI.hex(g));
+        gridKeys[g].neighbors = [];
+        nighs.forEach(function(n){
+          gridKeys[g].neighbors.push(n.q+'.'+n.r+'.'+n.s)
+        });
+      }
+
+      next({"broadcast":"all","response":"spectatorJoined","responseData":{"battle":battle, "gridKeys":gridKeys}});
+      return;
     }
 
     if(battle.waitingOnPlayer){
@@ -171,6 +194,9 @@ const BattleAPI = {
   getMapPoints(msg, next){
     var battle = AppData.battles[msg.requestData.battleId];
     //redis
+    if(!battle){
+      return {"error":"no Battle defined"};
+    }
     var map = AppData.DB.map[battle.map];
     var points = {};
     for(h in map.keyMap){
@@ -353,7 +379,12 @@ const BattleAPI = {
 
     changes.units[battle.activeUnit] = startTurnUnitChanges;
 
-    var startUnitCommander = battle.commanders[battle.units[battle.activeUnit].commander];
+    var startUnitCommander;
+    if(battle.units[battle.activeUnit]){
+      startUnitCommander = battle.commanders[battle.units[battle.activeUnit].commander];
+    } else {
+      return {"error":"The Active Unit does not exist"}
+    }
     if(startUnitCommander.controlType === "AI"){
 
       //this is an odd place for this
