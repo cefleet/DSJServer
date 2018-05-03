@@ -54,14 +54,16 @@ class socket {
 
         console.log('sending via broadcast ',returnData.response);
         //redis
-        var user = AppData.Users[AppData.connections[con].userId];
-        returnData.responseData.connectedUser = user;
-        if(AppData.connections[con].readyState === 1){
-          AppData.connections[con].send(JSON.stringify({"responseData":returnData.responseData, "response":returnData.response, "returnFunc":returnFunc}));
-        } else {
-          removeList.push(con);
+        if(AppData.connections[con]){
+          var user = AppData.Users[AppData.connections[con].userId];
+          returnData.responseData.connectedUser = user;
+          if(AppData.connections[con].readyState === 1){
+            AppData.connections[con].send(JSON.stringify({"responseData":returnData.responseData, "response":returnData.response, "returnFunc":returnFunc}));
+          } else {
+            removeList.push(con);
+          }
         }
-      });
+        });
       var i = removeList.length-1;
       while(i > 0){
         console.log(i);

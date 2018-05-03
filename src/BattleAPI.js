@@ -529,9 +529,10 @@ const BattleAPI = {
     }
     //battle doesnt matter here
     //and this one doesn't "DO anything"
-    next({"response":"targets","responseData":{"targets":targets,abilityId:ability.id}})
-
+    next({"response":"targets","responseData":{"targets":targets,abilityId:ability.id}});
+    next({"broadcast":"all","response":"abilitySelected","responseData":{"battle":battle,"targets":targets,abilityId:ability.id}})
   },
+
   getAffectedList(msg,next){
     var battle = AppData.battles[msg.requestData.battleId];
     var units = battle.units;
@@ -542,6 +543,8 @@ const BattleAPI = {
     var hexList = AbilityCalculator.getAffectedHexes(sender, receiver, ability);
     var affectedUnits = AbilityCalculator.getAffectedUnits(hexList,sender,ability,units);
     next({"response":"affectedUnits","responseData":{"affectedUnits":affectedUnits}});
+    next({"broadcast":"all","response":"targetSelected","responseData":{"target":msg.requestData.target,"battle":battle,abilityId:ability.id, "affectedUnits":affectedUnits}})
+
   },
 
   doAbility(msg, next){
@@ -569,7 +572,6 @@ const BattleAPI = {
       });
 
       if(battle.battleOver){
-        console.log('Save the battle to file');
         var saveBattle = Object.assign({},battle);
         fs.writeFile("Battles/"+saveBattle.id+'.db', JSON.stringify(battle),function(err){
           if(err){
@@ -590,6 +592,14 @@ const BattleAPI = {
         }
       });
     }
+  },
+
+  viewingPath(msg, next){
+    var battle = AppData.battles[msg.requestData.battleId];
+    var path = msg.requestData.path;
+
+    next({"broadcast":"all","response":"potentialPath", "responseData":{battle:battle, path:path}})
+
   },
 
   moveUnit(msg, next){
