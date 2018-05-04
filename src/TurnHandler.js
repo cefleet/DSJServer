@@ -168,7 +168,7 @@ const TurnHandler = {
         console.log("INSTANT KILL");
         units[result.receiver]._hp = 0;
         */
-        
+
         if(ability.affectedAttribute === "_hp" || ability.affectedAttribute === "_energy"){
           if(units[result.receiver][ability.affectedAttribute] > units[result.receiver][ability.affectedAttribute.replace("_",'')]){
             //result difference here

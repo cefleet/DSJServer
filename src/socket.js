@@ -37,7 +37,7 @@ class socket {
         var user = AppData.Users[ws.userId];
         returnData.responseData.connectedUser = user;
       }
-      if(ws.readyState === 1){
+      if(ws.readyState === 1){ 
         console.log(returnData);
         ws.send(JSON.stringify({"responseData":returnData.responseData, "response":returnData.response, "returnFunc":returnFunc}));
       }else{
