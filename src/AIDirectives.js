@@ -17,7 +17,9 @@ const AIDirectives = {
     var unit = battle.units[battle.activeUnit];
     var target = null;
     if(unit.aggroTarget && !battle.units[unit.aggroTarget].hasFallen){
-      target = unit.aggroTarget
+      target = unit.aggroTarget;
+      console.log(battle.units[unit.aggroTarget]);
+      console.log(unit.aggroCount);
     } else {
       var cDist = 1000;//arbarturarly long number
       for(u in battle.units){
@@ -52,11 +54,8 @@ const AIDirectives = {
     var units = battle.units;
 
     var results = AbilityCalculator.doAbility(sender,receiver,ability,units);
-    console.log(results);
     if(results.hasOwnProperty("success")){
-      console.log("I Was abloe to Attack");
       var changes = TurnHandler.doAbility(results,battle,ability,sender,receiver);
-      console.log(changes);
       return {
         results:"success",
         data:changes

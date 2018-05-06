@@ -20,7 +20,7 @@ class AbilityCalculator {
     }
 
     //TODO CONSUMABLE IS DIFFERENT NOW
-    if(sender._energy < ability.energyUsed){
+    if(sender._energy < ability.consumes){
       return {"err":"Not Enough Energy."}
     }
 
@@ -208,7 +208,7 @@ class AbilityCalculator {
         }
         i++;
       }
-      units = newUnits; 
+      units = newUnits;
     }
     for(var u in units){
       if(

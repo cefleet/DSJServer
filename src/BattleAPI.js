@@ -624,7 +624,7 @@ const BattleAPI = {
     }
 
     for(var i = 0; i < path.length; i++){
-      if(!AppData.DB.map[battle.map].keyMap.hasOwnProperty(path[i].id)){
+      if(!AppData.DB.map[battle.map].keyMap.hasOwnProperty(path[i])){
         console.log("Path goes off the map");
         next({"response":"pathGoesOffMap","responseData":{}});
         return;
@@ -633,14 +633,15 @@ const BattleAPI = {
 
     for(var u in battle.units){
       for(var i = 0; i < path.length; i++){
-        if(battle.units[u].onHex === path[i].id && !battle.units[u].hasFallen){
+        if(battle.units[u].onHex === path[i] && !battle.units[u].hasFallen){
           console.log('There is something on the path');
           next({"response":"somethingOnPath","responseData":{}});
           return;
         }
       }
     }
-    var hex = path[path.length-1].id;
+    console.log(path);
+    var hex = path[path.length-1];
     var changes = TurnHandler.moveUnit(unit, battle, hex);
 
     next({"broadcast":"all","response":"unitMoved", "responseData":{"battle":battle,"changes":changes}})

@@ -131,7 +131,6 @@ const TurnHandler = {
   //consider sending just id
   doAbility: function(results, battle, ability, sender, receiver){
     var units = battle.units;
-    console.log(results);
 
     var changes = {
       units:{
@@ -153,6 +152,12 @@ const TurnHandler = {
     if(results.hasOwnProperty("success")){
 
       sender._energy -= ability.consumes;
+
+/*
+      console.log("INSTA DRAIN");
+      units[sender.id]._energy = 0;
+*/
+
       sender.didAbility = true;
       changes.units[sender.id].didAbility = true;
       changes.units[sender.id]._energy = sender._energy;
@@ -162,20 +167,27 @@ const TurnHandler = {
           changes.units[result.receiver] = {};
         }
         units[result.receiver][ability.affectedAttribute] = Number(units[result.receiver][ability.affectedAttribute])+Number(result.value);
-        //if it is HP or energy it is handled differently
 
         /*
-        console.log("INSTANT KILL");
-        units[result.receiver]._hp = 0;
+          console.log("INSTANT KILL");
+          units[result.receiver]._hp = 0;
         */
 
+        //if it is HP or energy it is handled differently
+        //this makes sure that heals and energy drains do not go over or under
         if(ability.affectedAttribute === "_hp" || ability.affectedAttribute === "_energy"){
           if(units[result.receiver][ability.affectedAttribute] > units[result.receiver][ability.affectedAttribute.replace("_",'')]){
-            //result difference here
-
             result.value = result.value - (units[result.receiver][ability.affectedAttribute]-units[result.receiver][ability.affectedAttribute.replace("_",'')])
             units[result.receiver][ability.affectedAttribute] = units[result.receiver][ability.affectedAttribute.replace("_",'')];
           }
+        }
+
+        //calculate Aggro
+        if(ability.affectedAttribute === "_hp" && result.value < 0){ // it affects hp and is not a heal
+          if(units[result.receiver].aggroCount < Math.abs(result.value)){
+            units[result.receiver].aggroCount = Math.abs(result.value);
+            units[result.receiver].aggroTarget = sender.id;
+          } 
         }
 
         logItem.actionData.results.push({

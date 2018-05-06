@@ -30,15 +30,13 @@ class socket {
     }
     //if there is no broadcast it assumes single
     if(returnData.broadcast === "single" || !returnData.broadcast){
-      console.log('sending ', returnData.response);
 
       if(typeof returnData.responseData === "object"){
         //redis
         var user = AppData.Users[ws.userId];
         returnData.responseData.connectedUser = user;
       }
-      if(ws.readyState === 1){ 
-        console.log(returnData);
+      if(ws.readyState === 1){
         ws.send(JSON.stringify({"responseData":returnData.responseData, "response":returnData.response, "returnFunc":returnFunc}));
       }else{
         ws.terminate();
@@ -66,7 +64,6 @@ class socket {
         });
       var i = removeList.length-1;
       while(i > 0){
-        console.log(i);
         if(AppData.connections[removeList[i]]){
           AppData.connections[removeList[i]].terminate();
           battle.connections.splice(battle.connections.indexOf(removeList[i]),1);
@@ -77,7 +74,6 @@ class socket {
     } else if(returnData.broadcast === "universe") {
 
       for (var con in AppData.connections){
-        console.log('Sending to every connection');
         //redis
         var user = AppData.Users[AppData.connections[con].userId];
         returnData.responseData.connectedUser = user;
@@ -124,7 +120,6 @@ class socket {
             if(c === AppData.connections[ws.id].userId){
               console.log("An active user has disconnected");
               battle.connections.splice(battle.connections.indexOf(c),1);
-              console.log(battle.connections);
             }
           }
         }
@@ -164,10 +159,8 @@ class socket {
               }
               return;
             case "manage":
-              console.log('None Yet');
               return;
             case "setup":
-              console.log('Setting Up something;')
               if(SetupAPI.hasOwnProperty(msg.request)){
                 SetupAPI[msg.request](msg,this.respond.bind(this,ws,msg.returnFunc));
               }
@@ -193,7 +186,6 @@ class socket {
           if(c === AppData.connections[ws.id].userId){
             console.log("An active user has disconnected");
             battle.connections.splice(battle.connections.indexOf(c),1);
-            console.log(battle.connections);
           }
         }
       }
