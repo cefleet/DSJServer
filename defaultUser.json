@@ -5,7 +5,7 @@
 	"battles": [],
 	"color": "G",
 	"units": [{
-			"name": "Player Healer",
+			"name": "Hunter",
 			"shard": "cbe0cae3-96bf-4eb8-90bd-50e09a89ae33",
 			"dragon": "a4005bcc-a2fb-477a-b32d-888712886181",
 			"rider": "8a4322ac-d2c6-4d36-b82a-ef7e703cf0da",
@@ -21,6 +21,6 @@
 	],
 	"riders": ["8a4322ac-d2c6-4d36-b82a-ef7e703cf0da", "726b1e68-f13a-47b3-aba3-92d2a5fd255f"],
 	"dragons": ["a4005bcc-a2fb-477a-b32d-888712886181", "08d37765-89a5-4e96-923d-792cedde52b4"],
-	"weapons": ["b39b05bd-f3ee-41a5-a4a2-8506533b7022", "bee9a6cc-c3e5-4cc9-84d3-283726aaaf19"],
+	"weapons": ["b39b05bd-f3ee-41a5-a4a2-8506533b7022","bee9a6cc-c3e5-4cc9-84d3-283726aaaf19"],
 	"maps": ["586d621d-5770-408e-8e83-12ba47c39527"]
 }
