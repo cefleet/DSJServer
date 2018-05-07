@@ -7,6 +7,7 @@ class AbilityCalculator {
     //This makes sure the attacker can do the ability
     var errors = this.checkForErrorsInAttack(sending,receiving,ability);
     if(errors){
+      console.log(errors);
       return errors;
     } else {
       var results = this.executeAbility(sending,receiving,ability,units);
@@ -33,8 +34,11 @@ class AbilityCalculator {
       targetRelationship = "enemy";
     }
 
-    if(ability.affects !== targetRelationship){
-      return {"err":"Ability can ony Target an "+targetRelationship}
+    console.log(sender, receiver)
+
+
+    if(ability.affects !== targetRelationship && ability.style !== "aoe"){
+      return {"err":"Ability can ony Target an "+ability.affects}
     }
 
     if(sender.canTarget != "any" && sender.canTarget != receiver.id && ability.target == 'unit' && ability.affects == 'enemy'){
