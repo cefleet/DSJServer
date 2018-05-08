@@ -166,6 +166,7 @@ const TurnHandler = {
         if(!changes.units.hasOwnProperty(result.receiver)){
           changes.units[result.receiver] = {};
         }
+
         units[result.receiver][ability.affectedAttribute] = Number(units[result.receiver][ability.affectedAttribute])+Number(result.value);
 
         /*
@@ -187,7 +188,7 @@ const TurnHandler = {
           if(units[result.receiver].aggroCount < Math.abs(result.value)){
             units[result.receiver].aggroCount = Math.abs(result.value);
             units[result.receiver].aggroTarget = sender.id;
-          } 
+          }
         }
 
         logItem.actionData.results.push({
