@@ -140,7 +140,6 @@ const BattleAPI = {
             if(AppData.DB.shard[sId].color === newColor){
               usable = true;
               for(var u in battle.units){
-                console.log(battle.units[u]);
                 if(battle.units[u].parts.shard === sId){
                   usable = false;
                 }
@@ -339,13 +338,49 @@ const BattleAPI = {
     }
 
     var endTurnUnitChanges = TurnHandler.endTurn(unit.id,battle.id);
+
     logItems.push({
       "action":"TurnEnded",
       "timestamp":Date.now(),
       "actionData":{
         "unit":unit.id
       }});
+  
     changes.units[unit.id] = endTurnUnitChanges;
+
+    if(endTurnUnitChanges.hasFallen){
+      battle.battleOver = true;
+      battleOver = {
+        "action":"BattleOver",
+        "timestamp":Date.now()
+      }
+
+      for(comId in battle.commanders){
+        if(battle.commanders[comId].unitOrder.length > 0){
+          console.log('winner');
+          if(battle.commanders[comId].controlType === "Player"){
+            console.log("winner is a user!");
+            UserHandler.giveUserMapRewards(comId, battle.map);
+            console.log("send user request");
+          }
+        }
+      }
+      logItems.push(battleOver);
+      battle.battleLog.push(battleOver);
+      changes.battleLog = logItems;
+      next({"broadcast":"all","response":"nextTurn","responseData":{"battle":battle,"changes":changes}});
+      var saveBattle = Object.assign({},battle);
+      fs.writeFile("Battles/"+saveBattle.id+'.db', JSON.stringify(saveBattle),function(err){
+        if(err){
+          console.log(err);
+        } else {
+          console.log("Battle Saved");
+          delete AppData.battles[battle.id];
+        }
+      });
+      return;
+    }
+
 
     commander.curUnit += 1;
     if(commander.curUnit >= commander.unitOrder.length){
@@ -481,7 +516,6 @@ const BattleAPI = {
           changes.battleLog = logItems;
           next({"broadcast":"all","response":"nextTurn","responseData":{"battle":battle,"changes":changes}})
         } else {
-          console.log('Send The battle Results');
           changes.battleLog = logItems;
           next({"broadcast":"all","response":"nextTurn","responseData":{"battle":battle,"changes":changes}});
           var saveBattle = Object.assign({},battle);

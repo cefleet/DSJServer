@@ -15,6 +15,7 @@ function UnitStarter(data){
     canTarget:"any",
     canBeTargeted:true,
     totalDesperation:false,
+    totalDesperationCount:6,
     _energy:0,
     _hp:0,
     speedMod:0,

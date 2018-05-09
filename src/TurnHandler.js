@@ -43,7 +43,7 @@ const TurnHandler = {
 
   endTurn: function(unitId,battleId){
     var unit = AppData.battles[battleId].units[unitId];
-
+    var battle = AppData.battles[battleId];
     uChanges = {}
 
     var regen = unit.fullRegen;
@@ -85,18 +85,22 @@ const TurnHandler = {
       uChanges.speedMod = 0;
     }
 
-    if(unit.totalDesperation == true){
+    if(unit.totalDesperation){
       unit.desperationCountdown -= 1;
       uChanges.desperationCountdown = unit.desperationCountdown;
+      console.log('Totally Desperate with only '+unit.desperationCountdown+' More turns.');
       if(unit.desperationCountdown == 0){
         unit._hp = 0;
         unit.hasFallen = true;
         uChanges._hp = 0;
         uChanges.hasFallen = true;
+        battle.commanders[unit.commander].unitOrder =[];
       }
     }
     unit.onTurn = false;
     uChanges.onTurn = false;
+
+
     return uChanges;
   },
 
@@ -169,11 +173,11 @@ const TurnHandler = {
 
         units[result.receiver][ability.affectedAttribute] = Number(units[result.receiver][ability.affectedAttribute])+Number(result.value);
 
-        /*
+/*
           console.log("INSTANT KILL");
           units[result.receiver]._hp = 0;
-        */
 
+*/
         //if it is HP or energy it is handled differently
         //this makes sure that heals and energy drains do not go over or under
         if(ability.affectedAttribute === "_hp" || ability.affectedAttribute === "_energy"){
@@ -238,7 +242,7 @@ const TurnHandler = {
           }
 
           //Finally if it is the last unit... Total Desperation!!!
-          if(commander.unitOrder.length === 1){
+          if(commander.unitOrder.length === 1 && commander.controlType === "Player"){
             var unit = units[commander.unitOrder[0]];
             if(!changes.units.hasOwnProperty(unit.id)){
               changes.units[unit.id] = {};
@@ -246,6 +250,7 @@ const TurnHandler = {
             unit.power += unit.totalDesperationPowerBuff;
             unit.speed += unit.totalDesperationSpeedBuff;
             unit.totalDesperation = true;
+            unit.desperationCountdown = unit.totalDesperationCount;
             unit._energy = unit.energy;
             changes.units[unit.id].power = unit.power;
             changes.units[unit.id].speed = unit.speed;
