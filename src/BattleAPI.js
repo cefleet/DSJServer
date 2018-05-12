@@ -54,6 +54,10 @@ const BattleAPI = {
   changePlayerStatus(msg,next){
     console.log(msg);
     var battle = AppData.battles[msg.requestData.battleId];
+    if(!battle){
+      next({"broadcast":"all","response":"battleErr","responseData":{"err":"Battle Not found"}})
+      return;
+    }
     var com = battle.commanders[msg.requestData.commander];
     if(AppData.connections[msg.wsId].userId === com.id){
       if(com.ready){
@@ -229,6 +233,10 @@ const BattleAPI = {
 
   endBattle(msg, next){
     var battle = AppData.battles[msg.requestData.battleId];
+    if(!battle){
+      next({"response":"battleNotFound","responseData":{"err":"That battle cannot be found"}})
+      return;
+    }
     battle.isActive=false;
     //battle.connections = [];
 
@@ -239,10 +247,11 @@ const BattleAPI = {
       } else {
         console.log("Battle Saved");
         delete AppData.battles[battle.id];
-
       }
     });
     next({"broadcast":"all","response":"battleClosed", "responseData":{"battle":battle}});
+    next({"broadcast":"universe","response":"battleClosedUniverse", "responseData":{"battleId":battle.id}});
+
   },
 
   startBattle(msg, next){
@@ -280,6 +289,8 @@ const BattleAPI = {
     battle.battleStarted = true;
 
     next({"broadcast":"all","response":"battleStarted", "responseData":{"battle":battle,"changes":changes}});
+    next({"broadcast":"universe","response":"battleStartedUniverse", "responseData":{"battleId":battle.id}});
+
   },
 
   makeUnit(msg, next){
@@ -306,13 +317,37 @@ const BattleAPI = {
       comm.unitOrder.push(unit.id)
     }
 
-    var changes = {
-
-    }
+    //TODO save to the user
 
     //does't matter which one because the battle is going to be updated
     next({"broadcast":"all","response":"unitCreated", "responseData":{"battle":battle}});
   },
+
+  breakApartUnit(msg, next){
+    var battle = AppData.battles[msg.requestData.battleId];
+
+    //prevents from monkeying with unit after battle started
+    if(battle.battleStarted){
+      next({"response":"cannotBreakApartUnit","responseData":{"err":"Battle Started"}});
+      return;
+    }
+    //removes from commander
+    var comm = battle.commanders[AppData.connections[msg.wsId].userId];
+    //removes from battle
+    //TODO save the user
+
+    //does't matter which one because the
+    var idx = comm.unitOrder.indexOf(msg.requestData.unitId);
+    if(idx >= 0){
+      comm.unitOrder.splice(comm.unitOrder.indexOf(msg.requestData.unitId),1)
+      //if it already existed then it will just overwrite the old one.
+      delete battle.units[msg.requestData.unitId];
+      next({"broadcast":"all","response":"unitBrokeApart", "responseData":{"battle":battle}});
+    }  else {
+      next({"response":"cannotBreakApartUnit","responseData":{"err":"Unit Does Not Exist"}});
+    }
+  },
+
 
   endTurn(msg, next){
 
@@ -345,7 +380,7 @@ const BattleAPI = {
       "actionData":{
         "unit":unit.id
       }});
-  
+
     changes.units[unit.id] = endTurnUnitChanges;
 
     if(endTurnUnitChanges.hasFallen){

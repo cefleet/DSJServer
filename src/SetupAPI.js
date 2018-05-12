@@ -1,6 +1,7 @@
 const uuidv4 = require('uuid/v4');
 const AppData = require("./AppData.js");
 const fs = require("fs");
+const UserHandler = require("./UserHandler");
 
 const SetupAPI = {
   getDatabaseStatus(msg, next){
@@ -13,9 +14,10 @@ const SetupAPI = {
 
   getAllBattles(msg,next){
     var battles = [];
-    var hostName = "";
+
     var hostId;
     for(var b in AppData.battles){
+      var hostName = "";
       if(!AppData.battles[b].private){
         var i = 0;
         for(var c in AppData.battles[b].commanders){// should be only one at this time
@@ -30,12 +32,14 @@ const SetupAPI = {
           hostName += tag+AppData.battles[b].commanders[c].name;
           i++;
         }
+
         battles.push({
           battle:b,
           map:AppData.battles[b].map,
           hostName:hostName,
           hostId:hostId
         });
+        console.log(battles);
       }
     }
     next({"response":"fullBattleList", "responseData":battles})
@@ -43,8 +47,8 @@ const SetupAPI = {
 
   getAllPVPBattles(msg,next){
     var battles = [];
-    var hostName = "";
     for(var b in AppData.battles){
+      var hostName = "";
       if(AppData.battles[b].waitingOnPlayer && !AppData.battles[b].private){//only pvp has waiting on player at this time
         for(var c in AppData.battles[b].commanders){// should be only one at this time
           hostName = AppData.Users[c].username;
@@ -105,6 +109,17 @@ const SetupAPI = {
       }
     }
       next({"response":"connectionConfirmed", "responseData":id});
+  },
+
+  skipTutorials : function(msg, next){
+    var maps = ["586d621d-5770-408e-8e83-12ba47c39527","586d621d-5770-409e-8e83-12ba67c4527"];
+    console.log(msg);
+    var user = AppData.Users[AppData.connections[msg.wsId].userId];
+    console.log(user);
+    UserHandler.giveUserMapRewards(user.id,maps[0]);
+    UserHandler.giveUserMapRewards(user.id,maps[1]);
+    next({"response":"userData", "responseData":{user:user}})
+
   }
 }
 
