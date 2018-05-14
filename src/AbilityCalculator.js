@@ -162,8 +162,9 @@ class AbilityCalculator {
     //find affected hexes
     if(ability.style == "single"){
       affectedHexes = [HexAPI.hex(receiver.onHex)]
-    } else if(ability.style == "line") {
-      var dir = getDirectionFromHex(HexAPI(sender.onHex),HexAPI(receiver.onHex));
+    } else if(ability.style == "linear") {
+      var dir = HexAPI.getDirectionFromHex(HexAPI.hex(sender.onHex),HexAPI.hex(receiver.onHex));
+      console.log(dir);
       affectedHexes = HexAPI.getStraightLineOfHexes(HexAPI.hex(sender.onHex), dir, ability.range);
     } else if(ability.style == "aoe"){
       affectedHexes = HexAPI.getHexesWithinDistance(HexAPI.hex(sender.onHex),ability.range);
@@ -196,15 +197,16 @@ class AbilityCalculator {
 
   getTargetableUnits(sender,ability, units){
     var targetable = [];
-
-    if(ability.style === "liner"){
+    console.log(ability);
+    if(ability.style === "linear"){
       console.log('I need to have a seperate calculator for this');
       var i = 0;
       var newUnits = {};
       while(i < 6){
         var p = HexAPI.getStraightLineOfHexes(HexAPI.hex(sender.onHex), i, ability.range);
+        console.log(p);
         for(var u in units){
-          for(var h = 0; h < possibly.length; h++){
+          for(var h = 0; h < p.length; h++){
             if(units[u].onHex === p[h].q+'.'+p[h].r+'.'+p[h].s){
               newUnits[u] = units[u];
             }

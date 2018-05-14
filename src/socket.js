@@ -107,9 +107,15 @@ class socket {
 
       if(msg.hasOwnProperty("request") && msg.request === "login"){
         var results = Auth.checkCredentials(msg);
-        ws.userId = results.userId;
-        this.respond(ws,msg.returnFunc, results.send);
-        return; // go no futher until login is complete
+        console.log(results);
+        if(results && ws){
+          ws.userId = results.userId;
+          this.respond(ws,msg.returnFunc, results.send);
+          return;
+        } else {
+          console.log('Some major error where there is no results')
+        }
+         // go no futher until login is complete
       //if it is not asking to login, check the token.
       }
 

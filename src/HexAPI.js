@@ -117,15 +117,22 @@ class HexAPI{
   };
 
   getDirectionFromHex(start,end){
-    var dist = getDistanceBetweenHexes(start,end);
+    console.log(end);
+    var endString = end.q+'.'+end.r+'.'+end.s;
+    var dist = this.getDistanceBetweenHexes(start,end);
     var dir = null;
     var i = 0;
     while(i < 6){
-      var line = getStraightLineOfHexes(start,i,dist);
+      var line = this.getStraightLineOfHexes(start,i,dist);
+      for(var l = 0; l < line.length; l++){
+        if(endString === line[l].q+'.'+line[l].r+'.'+line[l].s){
+          dir = i;
+        }
+      }
+      /*
       if(line.indexOf(end) >= 0){
         dir = i;
-
-      }
+      }*/
       i++;
     }
     return dir;
@@ -135,7 +142,8 @@ class HexAPI{
     var results= [];
     var i =0;
     while(i < distance){
-      results.push(getNeighborAtDirection(hex,direction));
+      hex = this.getNeighborAtDirection(hex,direction);
+      results.push(hex);
       i++;
     }
     return results;

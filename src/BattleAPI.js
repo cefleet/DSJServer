@@ -582,6 +582,7 @@ const BattleAPI = {
       next({"broadcast":"all","response":"nextTurn","responseData":{"battle":battle,"changes":changes}})
     }
   },
+
   getTargetableList(msg,next){
     var battle = AppData.battles[msg.requestData.battleId];
 
@@ -611,8 +612,8 @@ const BattleAPI = {
     var receiver = battle.units[msg.requestData.target];
     var hexList = AbilityCalculator.getAffectedHexes(sender, receiver, ability);
     var affectedUnits = AbilityCalculator.getAffectedUnits(hexList,sender,ability,units);
-    next({"response":"affectedUnits","responseData":{"affectedUnits":affectedUnits}});
-    next({"broadcast":"all","response":"targetSelected","responseData":{"target":msg.requestData.target,"battle":battle,abilityId:ability.id, "affectedUnits":affectedUnits}})
+    next({"response":"affectedUnits","responseData":{"affectedUnits":affectedUnits, affectedHexes:hexList}});
+    next({"broadcast":"all","response":"targetSelected","responseData":{"target":msg.requestData.target,"battle":battle,abilityId:ability.id, "affectedUnits":affectedUnits, affectedHexes:hexList}})
 
   },
 
