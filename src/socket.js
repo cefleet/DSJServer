@@ -88,7 +88,7 @@ class socket {
         }
       }
     }
-  };
+  }; 
 
   connectionCreated(ws){
     //gives the ws an id and saves the connection

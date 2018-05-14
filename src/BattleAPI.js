@@ -271,6 +271,11 @@ const BattleAPI = {
       }
     }];
 
+    //if it is not true the activeUnit was destroyed or broken apart or osmething
+    if(!battle.units[battle.activeUnit]){
+      battle.activeUnit = battle.commanders[AppData.connections[msg.wsId].userId].unitOrder[0];
+    }
+
     battle.units[battle.activeUnit].onTurn = true;
     var changes = {
       battleStarted:true,
