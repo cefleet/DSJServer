@@ -8,7 +8,7 @@ const TurnHandler = {
 
     if(!unit){
       console.log('There is a major error where the unit no longer exists..');
-      return uChanges;
+      return null;
     }
 
     if(unit.didAbility){

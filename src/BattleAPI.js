@@ -443,6 +443,17 @@ const BattleAPI = {
     }
 
     var startTurnUnitChanges = TurnHandler.startTurn(battle.activeUnit,battle.id);
+	if(!startTurnUnitChanges){
+		console.log('The unit did not exist so I need to do something else')
+		for(c in battle.commanders){
+			if(c != commander.id){
+				battle.activeUnit = battle.commaners[c].unitOrder[0];
+				battle.commanders[c].curUnit = 0;
+				startTurnUnitChanges = TurnHandler.startTurn(battle.activeUnit,battle.id);
+
+			}
+	        }
+	}
 
     logItems.push({
       "action":"TurnStarted",
@@ -675,6 +686,32 @@ const BattleAPI = {
 
     next({"broadcast":"all","response":"potentialPath", "responseData":{battle:battle, path:path}})
 
+  },
+
+  getPossibleMoves(msg,next){
+	var battle = AppData.battles[msg.requestData.battleId];
+    	var unit = battle.units[msg.requestData.unit];
+  	var unitHex = HexAPI.hex(unit.onHex);
+
+      var obstacles = [];
+      for(u in battle.units){
+        obstacles.push(battle.units[u].onHex);
+      }
+      var AllWithinDistance = HexAPI.getHexesWithinDistance(unitHex,Number(unit.speed)+Number(unit.speedMod))
+      var keyMap  = AppData.DB.map[battle.map].keyMap;
+      AllWithinDistance.forEach(function(hex){
+        if(!keyMap.hasOwnProperty(hex.q+'.'+hex.r+'.'+hex.s)){
+          if(obstacles.indexOf(hex) < 0){
+            obstacles.push(hex.q+'.'+hex.r+'.'+hex.s);
+          }
+        }
+      });
+
+      var potentialMovements = HexAPI.getHexesReachableWithObstacles(
+        unitHex ,Number(unit.speed-1)+Number(unit.speedMod),obstacles
+      );
+	console.log(potentialMovements)
+     next({"response":"possibleMoves","responseData":{possibleMoves:potentialMovements, battle:battle}});
   },
 
   moveUnit(msg, next){

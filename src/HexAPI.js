@@ -207,7 +207,7 @@ class HexAPI{
       fringes[k-1].forEach(function(nHex){
         var dir = 0;
         while(dir < 6){
-          var n = this.getNeighborAtDirection(hex,dir);
+          var n = this.getNeighborAtDirection(nHex,dir);
           if(visited.indexOf(n) < 0 && obstacles.indexOf(n.q+'.'+n.r+'.'+n.s) < 0){
             visited.push(n);
             fringes[k].push(n);
